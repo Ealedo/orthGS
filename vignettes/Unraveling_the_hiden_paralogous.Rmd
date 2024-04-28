@@ -1,0 +1,20 @@
+---
+title: "Unraveling the Hiden Paralogous"
+output: rmarkdown::html_vignette
+author: Elena Aledo
+vignette: >
+  %\VignetteIndexEntry{Unraveling the Hiden Paralogous}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(orthGS)
+```
