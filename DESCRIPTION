@@ -1,6 +1,6 @@
 Package: orthGS
 Title: Orthology vs Paralogy Relationships among Glutamine Synthetase from Plants
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person("Elena", "Aledo",  email = "elenaaledoesteban@gmail.com", role = c("aut", "cre")),
     person("Juan-Carlos", "Aledo",  email = "caledo@uma.es", role = "aut", comment = c(ORCID = "0000-0002-3497-9945")))

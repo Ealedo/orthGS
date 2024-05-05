@@ -14,7 +14,7 @@
 ## --------------------------------------- ##
 #' Infer GS OrthoGroups Within a Set of Species
 #' @description Infers GS orthogroups using tree reconciliation
-#' @usage orthG(set)
+#' @usage orthG(set = "all")
 #' @param set set of species of interest provided as a character vector either with the binomial or short code of the species (see data(sdf)).
 #' @details When set = "all", all the species in the database will be included.
 #' @return  A list with two elements. The first one is the adjacency matrix (1 for orthologous, 0 for paralogous). The second element is an orthogroup graph.
@@ -24,7 +24,7 @@
 #' @importFrom utils data
 #' @export
 
-orthG <- function(set){
+orthG <- function(set = "all"){
 
   A_selected <- A_selected
   A <- A_selected

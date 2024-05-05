@@ -117,7 +117,7 @@ plot(o[[2]])
 
 
 ```{r}
-p <- paste(system.file("extdata", package = "orthGS"), "/conif1", sep  = "")
+p <- paste(system.file("extdata", package = "orthGS"), "/conifers", sep  = "")
 m <- mapTrees(path2rec = p) 
 # plot(m[[1]], cex = 0.5)
 # ape::nodelabels(m[[1]]$node,frame = "none", cex = 0.6)
