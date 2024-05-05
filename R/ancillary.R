@@ -4,6 +4,7 @@
 #      msa                               #
 #      mltree                            #
 #      gapless_msa                       #
+#      madRoot                           #
 #                                        #
 ## ------------------------------------ ##
 
@@ -21,13 +22,22 @@
 #' @param inhouse logical, if TRUE the in-house MUSCLE software is used. It must be installed on your system and in the search path for executables.
 #' @details If seqtype is set to "cds" the sequences must not contain stop codons and they will be translated using the standard code. Afterward, the amino acid alignment will be used to lead the codon alignment.
 #' @return Returns a list of four elements. The first one ($seq) provides the sequences analyzed, the second element ($id) returns the identifiers, the third element ($aln) provides the alignment in fasta format and the fourth element ($ali) gives the alignment in matrix format.
-#' @examples \dontrun{msa(sequences = sapply(c("P19446", "P40925", "P40926"), ptm::get.seq),ids = c("wmelon", "cyt", "mit"))}
+#' @examples msa(sequences = c("APGW", "AGWC", "CWGA"),ids = c("a", "b", "c"))
 #' @importFrom bio3d seqbind
 #' @importFrom bio3d seqaln
 #' @importFrom bio3d write.fasta
+#' @importFrom seqinr translate
 #' @export
 
 msa <- function (sequences, ids = names(sequences), seqtype = "prot", sfile = FALSE, inhouse = FALSE){
+
+  tr <- function(seq, genetic_code = 1){
+    seq <- gsub(" ", "", seq)
+    seq <- strsplit(seq, "")[[1]]
+    output <- paste(translate(seq, numcode = genetic_code), collapse = "")
+
+    return(output)
+  }
 
   if (length(sequences) < 2) {
     stop("At least two sequences are required!")
@@ -127,7 +137,7 @@ msa <- function (sequences, ids = names(sequences), seqtype = "prot", sfile = FA
 #' @usage mltree(msa, df = TRUE, gapl = TRUE, model = "WAG")
 #' @param msa input alignment.
 #' @param df logical. When TRUE msa should be a dataframe, when FALSE msa should be a string giving the path to a fasta file containing the alignment.
-#' @param gal logical, when TRUE a gapless alignment is used.
+#' @param gapl logical, when TRUE a gapless alignment is used.
 #' @param model allows to choose an amino acid models (see the function phangorn::as.pml)
 #' @details The function makes a NJ tree and then improvove it using an optimization procedure based on ML.
 #' @return a ML optimize tree (and parameters)
@@ -135,7 +145,6 @@ msa <- function (sequences, ids = names(sequences), seqtype = "prot", sfile = FA
 #' @seealso gapless_msa
 #' @importFrom ape nj
 #' @importFrom ape dist.aa
-#' @importFrom bio3d read.fasta
 #' @importFrom phangorn as.phyDat
 #' @importFrom phangorn pml
 #' @importFrom phangorn optim.pml
@@ -208,3 +217,190 @@ gapless_msa <- function(msa, seqtype = "AA", df = TRUE, sfile = FALSE){
   return(as.data.frame(output))
 }
 
+## --------------------------------------- ##
+##                   madRoot               ##
+## --------------------------------------- ##
+#' Find The Root of a Phylogenetic Tree Using MAD Method
+#' @description Finds the root of an unrooted phylogenetic tree by minimizing the relative deviation from the molecular clock.
+#' @usage madRoot(tree, output_mode = 'phylo')
+#' @param tree unrooted tree string in newick format or a tree object of class 'phylo'.
+#' @param output_mode amount of information to return. If 'phylo' (default) only the rooted tree is returned. If 'stats' also a structure with the ambiguity index, clock cv, the minimum ancestor deviation and the number of roots. If 'full' also an unrooted tree object, the index of the root branch, the branch ancestor deviations and a rooted tree object.
+#' @details This function is a slight modification of the code provided by Tria et al at https://www.mikrobio.uni-kiel.de/de/ag-dagan/ressourcen.
+#' @return a rooted tree and supplementary information if required.
+#' @author Tria, F. D. K., Landan, G. and Dagan, T.
+#' @examples \dontrun{madRoot(tree = bla)}
+#' @references Tria, F. D. K., Landan, G. and Dagan, T. Nat. Ecol. Evol. 1, 0193 (2017).
+#' @importFrom ape read.tree
+#' @importFrom ape is.binary
+#' @importFrom ape is.rooted
+#' @importFrom ape dist.nodes
+#' @importFrom ape write.tree
+#' @importFrom ape unroot
+#' @importFrom ape multi2di
+#' @importFrom ape drop.tip
+#' @importFrom phytools reroot
+#' @importFrom stats sd
+#' @export
+
+madRoot <- function(tree, output_mode = "phylo"){
+  unrooted_newick <- tree
+  # "Dependencies: 'ape' and 'phytools'","","Version: 1.1, 03-May-2017",sep="\n"))
+  t <- NA
+  if(inherits(unrooted_newick, "phylo")){
+     t <- unrooted_newick
+  }
+  else{
+    t <- read.tree(text = unrooted_newick)
+  }
+  if(is.rooted(t)){
+    t <- unroot(t)
+  }
+  # t$node.label<-NULL #To allow parsing when identical OTUs are present
+  if(!is.binary(t)){
+    warning("Input tree is not binary! Internal multifurcations will be converted to branches of length zero and identical OTUs will be collapsed!")
+    t <- multi2di(t)
+  }
+  tf <- t$edge.length < 0
+  if(any(tf)){
+    warning("Input tree contains negative branch lengths. They will be converted to zeros!")
+    t$edge.length[tf] <- 0
+  }
+
+  notu <- length(t$tip.label)
+  nbranch <- dim(t$edge)[1]
+  npairs <- notu*(notu-1)/2
+  nodeids <- 1:(nbranch+1)
+  otuids <- 1:notu
+  dis <- dist.nodes(t) # phenetic distance. All nodes
+  sdis <- dis[1:notu,1:notu] # phenetic distance. otus only
+
+  ## --- Start recursion to collapse identical OTUs, if present.
+  ii <- which(sdis == 0, arr.ind = TRUE)
+  k <- which(ii[,1] != ii[,2])
+  if(length(k)){
+    r <- ii[k[1],1]
+    c <- ii[k[1],2]
+    vv <- c(paste('@#',t$tip.label[r],'@#',sep=""),paste('(',t$tip.label[r],':0,',t$tip.label[c],':0)',sep=""))
+    st <- drop.tip(t,c)
+    st$tip.label[st$tip.label==t$tip.label[r]] <- vv[1]
+    res <- madRoot(st,output_mode) # mad -> madRoot
+    if(is.list(res)){
+      res[[1]] <- sub(vv[1],vv[2],res[[1]])
+    }
+    else{
+      res <- sub(vv[1],vv[2],res)
+    }
+    return(res) # create the list 'res' to return the results
+  }
+  ## --- End of recursion
+  t2 <- t
+  t2$edge.length <- rep(1,nbranch)
+  disbr <- dist.nodes(t2) # split distance. All nodes
+  sdisbr <- disbr[1:notu,1:notu] # split distance. otus only
+  rho <- vector(mode = "numeric",length = nbranch) # Store position of the optimized root nodes (branch order as in the input tree)
+  bad <- vector(mode = "numeric",length = nbranch) # Store branch ancestor deviations (branch order as in the input tree)
+  i2p <- matrix(nrow = nbranch+1, ncol = notu)
+  for (br in 1:nbranch){
+    # collect the deviations associated with straddling otu pairs
+    dij <- t$edge.length[br]
+    if(dij == 0){
+      rho[br] <- NA
+      bad[br] <- NA
+      next
+    }
+    rbca <- numeric(npairs)
+    i <- t$edge[br,1]
+    j <- t$edge[br,2]
+    sp <- dis[1:notu,i]<dis[1:notu,j] # otu split for 'br'
+    dbc <- matrix(sdis[sp,!sp],nrow=sum(sp),ncol=sum(!sp))
+    dbi <- replicate(dim(dbc)[2],dis[(1:notu)[sp],i])
+
+    rho[br] <- sum((dbc-2*dbi)*dbc^-2)/(2*dij*sum(dbc^-2)) # optimized root node relative to 'i' node
+    rho[br] <- min(max(0,rho[br]),1)
+    dab <- dbi+(dij*rho[br])
+    ndab <- length(dab)
+    rbca[1:ndab] <- as.vector(2*dab/dbc-1)
+    ## --- Collect the remaining deviations (non-traversing otus)
+    bcsp <- rbind(sp,!sp)
+    ij <- c(i,j)
+    counter <- ndab
+    for (w in c(1,2)){
+      if(sum(bcsp[w,])>=2){
+        disbrw <- disbr[,ij[w]]
+        pairids <- otuids[bcsp[w,]]
+        for (z in pairids){
+          i2p[,z] <- disbr[z,]+disbrw==disbrw[z]
+        }
+        for (z in 1:(length(pairids)-1)){
+          p1 <- pairids[z]
+          disp1 <- dis[p1,]
+          pan <- nodeids[i2p[,p1]]
+          for (y in (z+1):length(pairids)){
+            p2 <- pairids[y]
+            pan1 <- pan[i2p[pan,p2]]
+            an <- pan1[which.max(disbrw[pan1])]
+            counter <- counter+1
+            rbca[counter] <- 2*disp1[an]/disp1[p2]-1
+          }
+        }
+      }
+    }
+    if(length(rbca)!=npairs){
+      stop("Unexpected number of pairs. Report this error to ftria@ifam.uni-kiel.de")
+    }
+    bad[br] <- sqrt(mean(rbca^2)) # branch ancestor deviation
+  }
+  ## --- Select the branch with the minum ancestor deviation and calculate the root ambiguity index
+  jj <- sort(bad,index.return = TRUE)
+  tf <- bad == jj$x[1]
+  tf[is.na(tf)]<-FALSE
+  nroots <- sum(tf)
+  if (nroots>1){
+    warning("More than one possible root position. Multiple newick strings printed")
+  }
+  madr <- which(tf) # Index of the mad root branch(es)
+  rai <- jj$x[1]/jj$x[2] # Root ambiguity index
+  badr <- bad[tf] # Branch ancestor deviations value for the root(s)
+  ## --- Root the tree object, calculate the clock CV and retrieve the newick string
+  rt <- vector(mode = "list", nroots) # Rooted tree object
+  ccv <- vector(mode = "numeric",nroots) # Clock CV
+  rooted_newick <- vector(mode = "character", nroots)
+  for (i in 1:length(madr)){
+    pp <- rho[madr[i]]*t$edge.length[madr[i]]
+    nn <- t$edge[madr[i],]
+    # rt[[i]] <- reroot(t,nn[2],pos = pp)
+    rt[[i]] <- reroot(t,nn[2],position = pp)
+    rooted_newick[i] <- write.tree(rt[[i]])
+    dd <- dis[1:notu,nn]
+    sp <- dd[,1]<dd[,2]
+    otu2root <- vector(mode="numeric",notu)
+    otu2root[sp] <- dd[sp,1] + pp
+    otu2root[!sp] <- dd[!sp,1] - pp
+    ccv[i] <- 100*sd(otu2root)/mean(otu2root)
+  }
+  rooted_newick <- sub(')Root;',');', rooted_newick)
+
+  ## --- Output the result(s)
+  rtr <- read.tree(text = rooted_newick)
+  if(output_mode == "phylo")
+  {
+    return(rtr)
+  }
+  else if (output_mode == "stats"){
+    root_stats <- data.frame(ambiguity_index = rai,
+                             clock_cv = ccv,
+                             ancestor_deviation = badr,
+                             n_roots = nroots)
+    return(list(rtr, root_stats))
+  }
+  else if(output_mode == 'full'){ #Rooted newick, stats, unrooted tree object, index of the branch root, ancestor deviations, rooted tree object
+    root_stats <- data.frame(ambiguity_index = rai,
+                             clock_cv=ccv,
+                             ancestor_deviation=badr,
+                             n_roots=nroots)
+    return(list(rooted_newick,root_stats,t,madr,bad,rtr))
+  }
+  else{
+    return(rtr)
+  }
+}

@@ -27,5 +27,5 @@ Aligns multiple protein, DNA or CDS sequences.
 If seqtype is set to "cds" the sequences must not contain stop codons and they will be translated using the standard code. Afterward, the amino acid alignment will be used to lead the codon alignment.
 }
 \examples{
-\dontrun{msa(sequences = sapply(c("P19446", "P40925", "P40926"), ptm::get.seq),ids = c("wmelon", "cyt", "mit"))}
+msa(sequences = c("APGW", "AGWC", "CWGA"),ids = c("a", "b", "c"))
 }

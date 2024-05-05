@@ -4,7 +4,7 @@
 \alias{speciesGS}
 \title{Map Species Names}
 \usage{
-subsetGS(sp)
+speciesGS(sp)
 }
 \arguments{
 \item{sp}{set of species of interest (either binomial or short code name)}

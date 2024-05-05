@@ -3,7 +3,7 @@ library(orthGS)
 ## ---------------------------------------------- ##
 #                 Testing coltips                  #
 ## ---------------------------------------------- ##
-test_that("coltips() works properly with UniProt",{
+test_that("coltips() works properly",{
 
   skip_on_cran()
   skip_on_travis()

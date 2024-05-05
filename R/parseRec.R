@@ -16,11 +16,12 @@
 #' @return a color vector as long as the number of tips
 #' @examples \dontrun{coltips(phy = bla)}
 #' @importFrom phangorn as.phyDat
+#' @importFrom utils data
 #' @export
 
 coltips <- function(phy){
   # Make sure that load("./AngGymFern.Rda") has been executed
-  data("agf")
+  agf <- agf
   tr <- phy
   col <- numeric(length(tr$tip.label))
   for (i in 1:length(tr$tip.label)){
@@ -52,6 +53,7 @@ coltips <- function(phy){
 #' @return A list with three elements. The first one is a 'phylo' object where the nodelabels indicate the event: D, duplication or T transfer. If no label is shown is because the event correspond to speciation. The second element is a dataframe (the first column is the label of the internal nodes in the gene tree; the second column is the label of the internal nodes in the species tree, and the third and fourth columns label each internal node according to the inferred event). The third element of the list is an adjacency matrix: 1 when two proteins are orthologous, 0 if they are paralogous.
 #' @examples \dontrun{mapTrees(path2rec = bla)}
 #' @importFrom ape read.tree
+#' @importFrom castor get_pairwise_mrcas
 #' @export
 
 mapTrees <- function(path2rec){
@@ -108,7 +110,7 @@ mapTrees <- function(path2rec){
     for (j in (i+1):n){
       vs <- colnames(A)[j]
       vs_ <- strsplit(vs, "_")[[1]][1]
-      tnode <- castor::get_pairwise_mrcas(gtr, t, vs)
+      tnode <- get_pairwise_mrcas(gtr, t, vs)
       tevent <- ndf$event[which(ndf$n == tnode)]
 
       if (tevent == "Duplication"){

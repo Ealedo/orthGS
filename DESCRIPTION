@@ -1,12 +1,12 @@
 Package: orthGS
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: Orthology vs Paralogy Relationships among Glutamine Synthetase from Plants
+Version: 0.1.1
+Authors@R: c(
+    person("Elena", "Aledo",  email = "elenaaledoesteban@gmail.com", role = c("aut", "cre")),
+    person("Juan-Carlos", "Aledo",  email = "caledo@uma.es", role = "aut", comment = c(ORCID = "0000-0002-3497-9945")))
+Description: This package provides a set of tools to analyze and infer orthology and paralogy relationships 
+    between glutamine synthetase proteins from seed plants.
+License: GPL (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
@@ -16,12 +16,16 @@ LazyData: true
 Imports:
   ape,
   bio3d,
+  castor,
+  igraph,
   phangorn,
+  phytools,
   seqinr,
   TreeTools
 Suggests: 
 	Biostrings,
     knitr,
     muscle,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr

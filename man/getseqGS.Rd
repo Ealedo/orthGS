@@ -4,10 +4,10 @@
 \alias{getseqGS}
 \title{Get the GS Sequence}
 \usage{
-getseqGS(id, molecule = "Prot")
+getseqGS(phylo_id, molecule = "Prot")
 }
 \arguments{
-\item{id}{the unique sequence identifier}
+\item{phylo_id}{the unique sequence identifier}
 
 \item{molecule}{either "Prot" or "CDS"}
 }

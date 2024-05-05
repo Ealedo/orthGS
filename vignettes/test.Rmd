@@ -1,0 +1,41 @@
+---
+title: "Glutamine Synthetase from Conifers: Unraveling the Hiden Paralogs"
+output: rmarkdown::html_vignette
+author: Elena Aledo
+vignette: >
+  %\VignetteIndexEntry{Unraveling the Hiden Paralogous}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r,include = FALSE}
+library(orthGS)
+```
+
+## R Markdown
+
+bla bla
+
+
+```{r}
+plot(1:10, 10:1)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

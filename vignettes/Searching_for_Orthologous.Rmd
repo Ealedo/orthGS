@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r, include = FALSE}
 library(orthGS)
 ```
 
@@ -31,7 +31,7 @@ In this paper, the authors reports the crystal structure of maize GS. However, a
 
 &nbsp;
 
-At first you're slightly bewildered: none of the corn isoforms is called GS1a! But, everybody knows that GS1 implies a cytosolic form of the enzyme (while GS2 refer to the chloroplastic one), so our protein should be one of the five cytosolic isoenzymes present in maize. Taking into consideration that isoleucine should be present at position 161 and other information related to the sequence that is provided in the above mentioned paper, we conclude that GS1a match with GS1-4 from UniProt (or Zm_GS1b_4 using the phylo identifier of orthGS).
+At first you're slightly bewildered: none of the corn isoforms is called GS1a! But, everybody knows that GS1 implies a cytosolic form of the enzyme (while GS2 refer to the chloroplastic one), so our protein should be one of the five cytosolic isoenzymes present in maize. Taking into consideration that isoleucine should be present at position 161 and other information related to the sequence that is provided in the above mentioned paper, we conclude that GS1a match with GS1-4 from UniProt (or Zm_GS1b_4 using the phylo identifier of **orthGS**).
 
 As a side note, point that the choice of GS1a to name this maize isoform was somewhat unfortunate. Indeed, among researcher in the gymnosperm field, GS1a is a term used to describe a set of evolutionary close cytosolic proteins whose expression and function is related to photosynthesis and photorespiration, reminiscent of GS2 in angiosperms.
 

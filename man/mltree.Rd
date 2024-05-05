@@ -11,9 +11,9 @@ mltree(msa, df = TRUE, gapl = TRUE, model = "WAG")
 
 \item{df}{logical. When TRUE msa should be a dataframe, when FALSE msa should be a string giving the path to a fasta file containing the alignment.}
 
-\item{model}{allows to choose an amino acid models (see the function phangorn::as.pml)}
+\item{gapl}{logical, when TRUE a gapless alignment is used.}
 
-\item{gal}{logical, when TRUE a gapless alignment is used.}
+\item{model}{allows to choose an amino acid models (see the function phangorn::as.pml)}
 }
 \value{
 a ML optimize tree (and parameters)

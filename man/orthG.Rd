@@ -16,7 +16,7 @@ A list with two elements. The first one is the adjacency matrix (1 for orthologo
 Infers GS orthogroups using tree reconciliation
 }
 \details{
-The species set should be provided as character vector of eihter the nomimal name of the species of the 3 letter code (see data(sdf)).
+The species set should be provided as character vector of eihter the nomimal name of the species of the 3 letter code (see data(sdf)). When set = "all", all the species in the database will be included.
 }
 \examples{
 orthG(set = c("Pp", "Psy", "Psm", "Ap"))
