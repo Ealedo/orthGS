@@ -4,10 +4,10 @@
 \alias{orthG}
 \title{Infer GS OrthoGroups Within a Set of Species}
 \usage{
-orthG(set)
+orthG(set = "all")
 }
 \arguments{
-\item{set}{set of species of interest provided as a character vector either with the binomial or short code of the species.}
+\item{set}{set of species of interest provided as a character vector either with the binomial or short code of the species (see data(sdf)).}
 }
 \value{
 A list with two elements. The first one is the adjacency matrix (1 for orthologous, 0 for paralogous). The second element is an orthogroup graph.
@@ -16,7 +16,7 @@ A list with two elements. The first one is the adjacency matrix (1 for orthologo
 Infers GS orthogroups using tree reconciliation
 }
 \details{
-The species set should be provided as character vector of eihter the nomimal name of the species of the 3 letter code (see data(sdf)). When set = "all", all the species in the database will be included.
+When set = "all", all the species in the database will be included.
 }
 \examples{
 orthG(set = c("Pp", "Psy", "Psm", "Ap"))

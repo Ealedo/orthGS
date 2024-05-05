@@ -95,3 +95,18 @@ test_that("subsetGS() works properly with UniProt",{
   expect_equal(dim(b), c(6,23))
 
 })
+
+
+## ---------------------------------------------- ##
+#                Testing speciesGS                 #
+## ---------------------------------------------- ##
+test_that("subsetGS() works properly with UniProt",{
+
+  skip_on_cran()
+  skip_on_travis()
+
+  a <- speciesGS(c("Pinus pinaster", "Ath"))
+
+  expect_is(a, "NULL")
+
+})
