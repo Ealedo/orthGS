@@ -92,38 +92,87 @@ plot(ptr, use.edge.length = FALSE, cex = 0.6)
 
 &nbsp;
 
-![Figure 4. Protein tree of the GS family from the conifer species shown in the previous figure. The phylogenetic relationship in conflict with the species tree has been emphasize by pink rectangles. ](./Figures/conif_ptr.png){width=50%}
+![Figure 4. Protein tree of the GS family from the conifer species shown in the previous figure. The phylogenetic relationship in conflict with the species tree has been emphasized by pink rectangles.](./Figures/conif_ptr.png){width=50%}
+
 &nbsp;
  
 As it is evident from previous figures, there are some conflicts between the well established species tree (Figure 3) and the GS protein tree (Figure 4) we have build up. For instance, the genus Picea is sister to the genus Pinus, however GS1a from Picea species are more closely related to the GS1a from Abies than Pinus, which obviously demand reconciliation!
 
-When we look at the genomes of these 12 conifer species, we find that GS1a is a single-copy gene. That is, that each species has one and only one GS1a gene. We could naively thing that GS1a es a good gene to infer the phylogenetic relationships of these species. However, we have seen that this is not the case. The reason is that we have assumed that the 12 GS1a proteins we have been analyzing are orthologs, when in reality, as we shall see below, we have a mixture of orthologs and paralogs.
+When we look at the genomes of these 12 conifer species, we find that GS1a is a single-copy gene. That is, that each species has one and only one GS1a gene. We could naively thing that GS1a is a good gene to infer the phylogenetic relationships of these species. However, we have seen that this is not the case. The reason is that we have assumed that the 12 GS1a proteins we have been analyzing are orthologs, when in reality, as we shall see below, we have a mixture of orthologs and paralogs.
 
 
 ### Phylogenetic reconciliation
 
 In phylogenetics, reconciliation is the term used to encompass a wide and varied range of inference techniques that aim to find the historical events (gene duplication, transfer, loss, etc) that best explain the inconsistencies between gene tree and species tree. Although many approaches have been developed in the last few years (see [9] for a review), the one implemented in the **orthGS** package is the method described in [10], which is based on the parsimony principle: the best gene/protein family history is the history with the fewest events. 
 
-If all we want is to know whether or not all GS1a are orthologs among them, and which GS1a proteins are orthologs (diverge by speciation) and which one are paralogs (diverge by duplication), we can make it easy by running the function `orthG()`, which takes as argument the set of species of interest, in our case the 12 conifer species and returns two object. The first one is an adjancency matrix. Since in our case the 12 species contribute 29 GS proteins, we expect a 29 x 29 square matrix (entries with 1 meaning orthology, and entries with 0 meaning paralogy). The second object returned by `orthG()` is a network graph. Two nodes (GS proteins) are conected when they are orthologs. Let's see this function in action!
-
-```{r, eval=FALSE, include=TRUE}
-o <- orthG(set = c("Pa","Psm","Pp","Pin","Abi","Ap",
-              "Ara","Pod","Nag","Sci","Tba","Tax"))
-plot(o[[2]])
-
-
-```
-
-
+We will focus in the six species belonging to the order Pinales (green rectangle from Figure 3), which phylogenetic relationships seem to be in conflict with that suggested in the protein tree (Figure 4, top pink rectangle). So, let's start by collecting the relevant data regarding the GS isoforms present in this set of species:
 
 ```{r}
-p <- paste(system.file("extdata", package = "orthGS"), "/conifers", sep  = "")
-m <- mapTrees(path2rec = p) 
-# plot(m[[1]], cex = 0.5)
-# ape::nodelabels(m[[1]]$node,frame = "none", cex = 0.6)
-# orthG(set = conif$short)
-# orthP("Pp_GS1a", set = "all")
+data <- subsetGS(sp = c("Ap", "Abi", "Pin", "Pp", "Psm", "Pa"))[, 2:9]
+data$phylo_id
 ```
+
+We can check that there are 16 forms of GS: 6 GS1a proteins (one per species) and 10 GS1b isoforms. Next, we are going to plot the orthology network for this set of proteins. For this purpose we will use the function `orthG` that will take as argument the set of species that interest us: 
+
+```{r,  eval=FALSE, include=TRUE}
+o <- orthG(set = c("Ap", "Abi", "Pin", "Pp", "Psm", "Pa"))
+A <- o[[1]] # Adjacency matrix
+g <- o[[2]] # igraph object (orthology network)
+```
+
+It should be noted that the function `orthG` return a list with two objects. The first one is an adjacency matrix. In our case a square matrix of order 16  whose entries are 1 for orthology or 0 for paralogy. The second element of the returned list is an igraph network. 
+
+If desired, we can plot a subnetwork indicating the nodes of interest. For instance, let's focus our interest on GS1a:
+
+```{r include=FALSE}
+g <- orthG(set = c("Ap", "Abi", "Pin", "Pp", "Psm", "Pa"))[[2]] 
+```
+
+
+```{r, eval = FALSE}
+gs1a <- data$phylo[grepl("GS1a", data$phylo_id)] # selected nodes
+plot(igraph::subgraph(g, vids = gs1a))
+```
+
+
+&nbsp;
+
+![](./Figures/GS1a_pinales.png){width=50%}
+
+We observe that GS1a isoforms from the genus Pinus are paralogs of the GS1 from the genus Picea and Abies. On the other hand, all the GS1a from Picea and Abies are orthologs among them. In this way, the phylogenetic relationships inferred for the GS1a proteins from Pinales (Figure 4), are be reconciled with the phylogenetic tree of the species (Figure 3). Furthermore, the sequence of evolutionary events leading to such a reconcilation can be inferred and plotted (Figure 5)
+
+&nbsp;
+
+![Figure 5. Species and protein trees reconciliation. The focus has been placed on the order Pinales. The duplicantions (squares) and losses (crosses) has been emphisized with colored circles (turquoise for GS1a and brawn for GS1b).](./Figures/RecPinales.png){width=50%}
+
+
+## GS1a orthology network beyond conifers
+
+As already mentioned, GS1a is an isoform described to be present not only in all gymnosperms, including Aracaurales, Cupressales, Pinales, Gnetales, Ginkgoales and Cycadales, but also in basal angiosperms such as species from the orders Amborellales and Magnoliales. 
+
+The data included in the **orthGS** package cover 34 GS1a proteins from as many species. 
+
+```{r, eval=FALSE, include=TRUE}
+data <- sdf
+gs1a <- data[which(data$gs == "GS1a" & data$tax_group != "Ferns"), ]
+```
+
+This parity between the number of proteins and the number of species is rather misleading, since it might induce us to think that all these proteins are orthologs and that they have diverged exclusively due to speciation processes. However, if we plot the orthology network inferred by tree reconciliation, the picture is quite different: gene duplication within the GS1a lineage is frequent, but unlike what happens with the GS1b lineage, in the case of GS1a duplications seem to be balanced by losses.  
+
+```{r, eval = FALSE, include = TRUE}
+o <- orthG()
+g <- o[[2]]
+plot(igraph::subgraph(g, vids = gs1a$Sec.Name_))
+```
+
+&nbsp;
+
+![Figure 6. GS1a orthology network. Note that the GS1a forms from basal angiosperms are placed in the center and conected with gymnosperms GS1a, which are distributed around the periphery of the graph.](./Figures/GS1a_network.png){width=50%}
+
+&nbsp;
+
+
+It would be interesting to investigate in the future whether this balance between duplications and losses responds to selective forces or, on the contrary, can be explained based on the stochastic nature of these processes.
 
 
 ## References
